@@ -11,11 +11,21 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Library Catalog :: Browse</title>
+        <link href="style.css" rel="stylesheet">
     </head>
     <body>
     
         <%
         
+            if(session.getAttribute("userAccess") == null) {
+
+            RequestDispatcher rd = request.getRequestDispatcher("index.jsp?err=4");
+                    
+            rd.forward(request,response);
+                        
+             }
+        
+                       
         java.sql.Connection conn;
         java.sql.ResultSet rs;
         java.sql.Statement st;
@@ -26,14 +36,20 @@
         
         %>
         
+        <div class="banner">
         <h1>Library Catalog</h1>
+        </div>
         
+        <div class="menu">
+        <a href='index.jsp'>Home</a> |    
         <a href='user.jsp'>Register</a> |
         <a href='edit.jsp'>Edit</a> | 
-        <a href='browse.jsp'>Browse</a>
-        
-        <h3>Reservations</h3>
-        
+        <a href='browse.jsp'>Browse</a> | 
+        <a href='reserve.jsp'>Reservations</a>
+        </div>
+
+        <fieldset>
+                <legend>Reserved Books</legend>
         <table>
             
             <tr><th>Book Name</th><th>Author</th></tr>
@@ -62,10 +78,10 @@
                         dbst.setString(1, session.getAttribute("userId").toString());
                         dbst.setString(2, book_id);
                         dbst.executeUpdate();
-                    
+                        
                     } else {
                         
-                        RequestDispatcher rd = request.getRequestDispatcher("login.jsp?err=1");
+                        RequestDispatcher rd = request.getRequestDispatcher("index.jsp?err=1");
                     
                         rd.forward(request,response);
                         
@@ -102,6 +118,8 @@
             %>
 
         </table>
+            
+        </fieldset>
 
     </body>
 </html>

@@ -10,6 +10,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Library Catalog :: Browse</title>
+        <link href="style.css" rel="stylesheet">
     </head>
     <body>
     
@@ -25,31 +26,55 @@
         
         %>
         
-        <form action="browse.jsp" method="POST">
+        <div class="banner">
+        <h1>Library Catalog</h1>
+        </div>
         
-            <select name="topic_id">
+        <div class="menu">
+        <a href='index.jsp'>Home</a> |    
+        <a href='user.jsp'>Register</a> |
+        <a href='edit.jsp'>Edit</a> | 
+        <a href='browse.jsp'>Browse</a> | 
+        <a href='reserve.jsp'>Reservations</a>
+        </div>
+     
+        <form action="browse.jsp" method="POST" >
+        
+            <fieldset>
                 
-                <%
+                <legend>Books</legend>
 
-                    st = conn.createStatement();
+                 <div class="searchform">
+                     
+                    <select name="topic_id">
 
-                    String query = "SELECT * FROM topics;";
+                        <option value="0">All</option>
 
-                    rs = st.executeQuery(query);
+                        <%
 
-                    while(rs.next()) {
+                        st = conn.createStatement();
 
-                        out.println("<option value='" + rs.getString(1) + "'>" + rs.getString(2) + "</option>");
-                            
-                     }
+                        String query = "SELECT * FROM topics;";
 
-                %>
+                        rs = st.executeQuery(query);
+
+                        while(rs.next()) {
+
+                            out.println("<option value='" + rs.getString(1) + "'>" + rs.getString(2) + "</option>");
+
+                         }
+
+                        %>
+
+                    </select>
+
+                    <input type="submit" name="search" value="Search">
                 
-            </select>
-            
-            <input type="submit" name="search" value="search">
-            
+                 </div>
+                        
         </form>
+                    
+        
         
         <table>
             
@@ -57,20 +82,23 @@
             
             <%
 
-                if(request.getParameter("reserve").equals("1")) {
+                if(request.getParameter("reserve") != null) {
+                    
+                    if(session.getAttribute("userAccess") != null) {
                 
-                    String book_id = request.getParameter("book_id");
+                        String book_id = request.getParameter("book_id");
+                        
+                        RequestDispatcher rd = request.getRequestDispatcher("reserve.jsp?reserve=1&book_id="+book_id);
                     
-                    query = "UPDATE books SET is_available = 0 WHERE book_id = '" + book_id + "';";
+                        rd.forward(request,response);
                     
-                    st = conn.createStatement();
+                    } else {
+                        
+                        RequestDispatcher rd = request.getRequestDispatcher("index.jsp?err=4");
                     
-                    st.executeUpdate(book_id);
-
-                    Object test = session.getAttribute("userId");
-                    
-                    query = "INSERT INTO reservations (user_id, book_id) VALUES ('" + test.toString() + "', '" + book_id + "');";
-                    
+                        rd.forward(request,response);
+                        
+                    }
                     
                 }
                 
@@ -78,7 +106,11 @@
                 
                 if(request.getParameter("topic_id") != null) {
                     
-                    clause = " WHERE topics.topic_id = " + request.getParameter("topic_id");
+                    if(!request.getParameter("topic_id").equals("0")) {
+                        
+                        clause = " WHERE topics.topic_id = " + request.getParameter("topic_id");
+                        
+                    }
                     
                 }
                
@@ -93,8 +125,6 @@
                     rs = st.executeQuery(query);
 
                     while(rs.next()) {
-                        
-                        out.println(rs.getString(5));
                         
                         if(rs.getString(5).equals("1")) {
                             out.println("<tr><td>"+rs.getString(1)+"</td><td>"+rs.getString(2)+"</td><td>"+rs.getString(3)+"</td><td>"+rs.getString(4)+"</td><td><a href='browse.jsp?reserve=1&book_id="+rs.getString(1)+"'>Reserve</a></td></tr>");

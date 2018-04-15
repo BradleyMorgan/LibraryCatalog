@@ -7,8 +7,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -32,17 +30,6 @@ public class auth extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        
-        response.setContentType("text/html;charset=UTF-8");
-        
-        try (PrintWriter out = response.getWriter()) {
-            
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Login</title>");            
-            out.println("</head>");
-            out.println("<body>");
 
             java.sql.Connection conn;
             java.sql.ResultSet rs;
@@ -54,7 +41,9 @@ public class auth extends HttpServlet {
             
             } catch (ClassNotFoundException ex) {
             
-                Logger.getLogger(auth.class.getName()).log(Level.SEVERE, null, ex);
+                RequestDispatcher rd = request.getRequestDispatcher("index.jsp?err=3");
+                    
+                rd.forward(request,response);
             
             }
             
@@ -62,56 +51,60 @@ public class auth extends HttpServlet {
 
                 conn = java.sql.DriverManager.getConnection("jdbc:mysql://localhost/library_catalog", "comp6000", "comp6000");
 
-                st = conn.createStatement();
+                java.sql.PreparedStatement dbst = null;
 
                 String un = request.getParameter("un");
                 String pw = request.getParameter("pw");
 
-                String query = "SELECT COUNT(*), users.* FROM users WHERE username = '" + un + "' and password = '" + pw + "' GROUP BY user_id;";
+                String query = "SELECT COUNT(*), users.* FROM users WHERE username = ? and password = ? GROUP BY user_id;";
 
-                //out.println(query);
+                dbst = conn.prepareStatement(query);
+                dbst.setString(1, un);
+                dbst.setString(2, pw);
+                
+                rs = dbst.executeQuery();
 
-                rs = st.executeQuery(query);
-
-                rs.next();
-
-                if(rs.getInt(1) != 1) {
-
-                    out.println("Login Failed.");
+                if(rs.next()) {
                     
-                    RequestDispatcher rd = request.getRequestDispatcher("login.jsp?err=1");
-                    
-                    rd.forward(request,response);
-                    
+                    if(rs.getInt(1) != 1) {
 
+                        RequestDispatcher rd = request.getRequestDispatcher("index.jsp?err=1");
+
+                        rd.forward(request,response);
+                        
+                        
+                    } else {
+
+                        HttpSession session = request.getSession();
+
+                        session.setAttribute("userId", rs.getString(2));
+                        session.setAttribute("userAccess", rs.getString(4));
+                        session.setAttribute("userName", rs.getString(3));
+
+                        RequestDispatcher rd = request.getRequestDispatcher("index.jsp?success=1");
+
+                        rd.forward(request, response);
+
+                    }
+                
                 } else {
+                    
+                    RequestDispatcher rd = request.getRequestDispatcher("index.jsp?err=1");
 
-                    out.println("Welcome, " + rs.getString(3));
-                    
-                    HttpSession session = request.getSession();
-                    
-                    session.setAttribute("userAccess", un);
-                    session.setAttribute("userId", rs.getString(1));
-                    
-                    RequestDispatcher rd = request.getRequestDispatcher("");
-                    
                     rd.forward(request,response);
-                    
-
+                        
                 }
 
             } catch (SQLException dbException) {
 
-                RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+                RequestDispatcher rd = request.getRequestDispatcher("index.jsp?err=2");
                     
                 rd.forward(request,response);
 
             }            
             
-            out.println("</body>");
-            out.println("</html>");
             
-        }
+        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

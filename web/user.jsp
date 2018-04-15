@@ -13,37 +13,26 @@
         <link href="style.css" rel="stylesheet">
     </head>
     <body>
-        <h3>New User Registration</h3>
-        <form action="user.jsp" method="POST">
-                <p>
-                    <label for="un"><span>Username</span></label>
-                    <input type="text" name="un">
-                </p>
-                <p>
-                    <label for="un"><span>First Name</span></label>
-                    <input type="text" name="fname">
-                </p>
-                <p>
-                    <label for="un"><span>Last Name</span></label>
-                    <input type="text" name="lname">
-                </p>
-                <p>
-                    <label for="pw"><span>Password</span></label>
-                    <input type="password" name="pw">
-                </p>
-                <p>
-                    <label for="pw"><span>Confirm</span></label>
-                    <input type="password" name="pwconf">
-                </p>
-                <span style="display: inline-block; width: 230px; text-align: right;">
-                    <input type="submit" name="submit" value="Register">
-                </span>
-        </form>       
         
+        <div class="banner">
+        <h1>Library Catalog</h1>
+        </div>
+        
+        <div class="menu">
+        <a href='index.jsp'>Home</a> |    
+        <a href='user.jsp'>Register</a> |
+        <a href='edit.jsp'>Edit</a> | 
+        <a href='browse.jsp'>Browse</a> | 
+        <a href='reserve.jsp'>Reservations</a>
+        </div>
+        
+        <div class="alert">
+            
         <%
         
         if(request.getParameter("submit") != null) {
             
+            session.invalidate();
             
             java.sql.Connection conn;
             java.sql.ResultSet rs;
@@ -69,15 +58,15 @@
   
             if(un.isEmpty() || pw.isEmpty() || fn.isEmpty() || ln.isEmpty()) {
                 
-                out.println("All fields are required.");
+                out.println("<p>All fields are required.</p>");
                 
             } else if(rs.next()) {
                 
-                out.println("Error, user exists.");
+                out.println("<p>Error, user exists.</p>");
             
             } else if(!pwconf.equals(pw)) {
                 
-                out.println("Error, passwords do not match.");
+                out.println("<p>Error, passwords do not match.</p>");
                 
             } else {
             
@@ -96,13 +85,15 @@
                         
                     } else {
                         
-                        out.println("<p>User registration successful.</p>");
+                        RequestDispatcher rd = request.getRequestDispatcher("index.jsp?registered=1");
+                    
+                        rd.forward(request,response);
                         
                     }
                     
                 } catch (Exception dbException) {
 
-                    out.println("Error: update failed: " + dbException.getMessage());
+                    out.println("<p>Error: update failed: " + dbException.getMessage() + "</p>");
 
                 }
                 
@@ -111,6 +102,37 @@
         }
 
         %>
+        
+        </div>
+        
+        <form action="user.jsp" method="POST">
+            <fieldset>
+                <legend>User Registration</legend>
+                <p>
+                    <label for="un"><span>Username</span></label>
+                    <input type="text" name="un">
+                </p>
+                <p>
+                    <label for="un"><span>First Name</span></label>
+                    <input type="text" name="fname">
+                </p>
+                <p>
+                    <label for="un"><span>Last Name</span></label>
+                    <input type="text" name="lname">
+                </p>
+                <p>
+                    <label for="pw"><span>Password</span></label>
+                    <input type="password" name="pw">
+                </p>
+                <p>
+                    <label for="pw"><span>Confirm</span></label>
+                    <input type="password" name="pwconf">
+                </p>
+                <span class="button">
+                    <input type="submit" name="submit" value="Register">
+                </span>
+            </fieldset>
+        </form>       
         
     </body>
 </html>

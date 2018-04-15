@@ -10,10 +10,19 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Library Catalog :: Edit</title>
+        <link href="style.css" rel="stylesheet">
     </head>
     <body>
         
         <%
+        
+            if(session.getAttribute("userAccess") == null) {
+
+            RequestDispatcher rd = request.getRequestDispatcher("index.jsp?err=4");
+                    
+            rd.forward(request,response);
+                        
+             }
         
         java.sql.Connection conn;
         java.sql.ResultSet rs;
@@ -31,7 +40,7 @@
 
             String query = "INSERT INTO topics (topic_name) VALUES('"+topic+"');";
 
-            out.println(query);
+            //out.println(query);
             
             st.executeUpdate(query);
 
@@ -45,7 +54,7 @@
 
             String query = "INSERT INTO authors (author_name) VALUES('"+author+"');";
 
-            out.println(query);
+            //out.println(query);
             
             st.executeUpdate(query);
 
@@ -62,7 +71,7 @@
 
             String query = "INSERT INTO books (topic_id, book_name, author_id, is_available) VALUES('"+topic_id+"','"+book_name+"','"+author_id+"','"+book_avail+"');";
 
-            out.println(query);
+            //out.println(query);
             
             st.executeUpdate(query);
 
@@ -71,30 +80,49 @@
 
         %>
         
-        <h3>Add New Topic</h3>
+        <div class="banner">
+        <h1>Library Catalog</h1>
+        </div>
+        
+        <div class="menu">
+        <a href='index.jsp'>Home</a> |    
+        <a href='user.jsp'>Register</a> |
+        <a href='edit.jsp'>Edit</a> | 
+        <a href='browse.jsp'>Browse</a> | 
+        <a href='reserve.jsp'>Reservations</a>
+        </div>
+
+        
         <form action="edit.jsp" method="POST">
+            <fieldset>
+                <legend>Add Topic</legend>
                 <p>
                     <label for="topic"><span>Topic</span></label>
                     <input type="text" name="topic">
                 </p>          
-                <span style="display: inline-block; width: 230px; text-align: right;">
+                <span class="button">
                     <input type="submit" name="topic_submit" value="Add Topic">
                 </span>
+                
+            </fieldset>
         </form>       
         
-        <h3>Add New Author</h3>
         <form action="edit.jsp" method="POST">
+            <fieldset>
+                <legend>Add Author</legend>
                 <p>
-                    <label for="author"><span>Author Name</span></label>
+                    <label for="author"><span>Name</span></label>
                     <input type="text" name="author">
                 </p>
-                <span style="display: inline-block; width: 230px; text-align: right;">
+                <span class="button">
                     <input type="submit" name="author_submit" value="Add Author">
                 </span>
+            </fieldset>
         </form>       
         
-        <h3>Add New Book</h3>
         <form action="edit.jsp" method="POST">
+            <fieldset>
+                <legend>Add Book</legend>
                 <p>
                     <label for="un"><span>Author</span></label>
                     <select name="author_id">
@@ -150,9 +178,11 @@
                     <label for="book_avail"><span>Availability</span></label>
                     <input type="text" name="book_avail">
                 </p>
-                <span style="display: inline-block; width: 230px; text-align: right;">
+                <span class="button">
                     <input type="submit" name="book_submit" value="Add Book">
                 </span>
+                
+            </fieldset>
         </form>       
         
         
